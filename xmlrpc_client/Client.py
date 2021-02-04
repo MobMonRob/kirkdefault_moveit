@@ -8,6 +8,7 @@ import rospy
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
+import time
 from tf.transformations import quaternion_from_euler
 import Cube
 
@@ -21,11 +22,12 @@ rospy.init_node('move_group_python_interface_tutorial',
 robot = moveit_commander.RobotCommander()
 scene = moveit_commander.PlanningSceneInterface()
 group = moveit_commander.MoveGroupCommander("right_arm")
-display_trajecdtory_publisher = rospy.Publisher(
+display_trajectory_publisher = rospy.Publisher(
                                     '/move_group/display_planned_path',
                                     moveit_msgs.msg.DisplayTrajectory,
                                     queue_size=5)
-server_name = "https://192.168.0.102:8000" #http://192.168.12.199:8000
+
+server_name = 'http://192.168.12.199:8000' #http://192.168.12.199:8000
 server = xmlrpclib.ServerProxy(server_name)
 
 pose_target = geometry_msgs.msg.Pose()
@@ -43,10 +45,10 @@ def home():
 
 #sets the necessary flags that need to be set after a valid movemen
 def setFlags():
-    print "setting flags"
-    #server.setReady(True)
-    #server.increaseTrialnumber()
-    #server.setPause(True)
+    server.setReady(True)
+    x = server.increaseTrialnumber()
+    server.setPause(True)
+    print(" Trialnumber ", x)
 
 
 #here you can fill in your routine
@@ -124,13 +126,13 @@ def moveRoutine():
     all_coordinates = cube.random_bottom_up_y_axis_accesses()
     previous_y = 0
     current_y = 0
-    times = 0
     for i in range(0, len(all_coordinates)):
         if(previous_y != current_y):
+            #wait each time a plain is finished
             server.setPause(True)
-            while server.getPause() == True & times < 5:
-                times = times + 1
-                print "waiting"
+            while server.getPause() == True:
+                print ("waiting at end of plain ", i)
+                time.sleep(5)
                 pass
         times = 0
         previous_y = current_y
@@ -146,22 +148,23 @@ def moveRoutine():
     group.execute((plan))
 
 
-    #alternativly to waypoints
+    #alternativly to waypoints an example using pose_targets
     #pose_target.position.x = all_coordinates[i][0] * 0.01
     #pose_target.position.y = all_coordinates[i][1] * 0.01
     #pose_target.position.z = all_coordinates[i][2] * 0.01
     #group.set_pose_target(pose_target)
     #plan = group.plan()
     #group.execute(plan)
-    print "my move"
 
 
 
 #includes a move the home, setting flags, waiting for master, execution of the Routine and setting of flags for next move.
 def cycle():
     home()
+    server.setPause(True)
     while server.getPause() == True:
-        print "waiting"
+        print "waiting at home"
+        time.sleep(5)
         pass
     print "starting Routine"
     moveRoutine()
@@ -171,13 +174,10 @@ def cycle():
 
 def main():
 
-    #moveRoutine()
+  
     cycle()
 
-    #for method in server.system.listMethods():
-    #    print method
-    #    print server.system.methodHelp(method)
-    #    print ""
+    
 
 
 
