@@ -27,7 +27,7 @@ display_trajectory_publisher = rospy.Publisher(
                                     moveit_msgs.msg.DisplayTrajectory,
                                     queue_size=5)
 
-server_name = 'http://192.168.12.199:8000' #http://192.168.12.199:8000
+server_name = 'http://localhost:8000' #http://192.168.12.199:8000
 server = xmlrpclib.ServerProxy(server_name)
 
 pose_target = geometry_msgs.msg.Pose()
@@ -37,7 +37,7 @@ pose_target = geometry_msgs.msg.Pose()
 #drives the Robot to the predefined default position and sets all necessary flags
 def home():
 
-    group.set_named_target("home")
+    group.set_named_target("zero_pose") #changed to "home" to "zero_pose" due to complications in urdf
     plan1 = group.plan()
     group.execute(plan1)
     setFlags()
@@ -120,41 +120,47 @@ def setFlags():
 def moveRoutine():
     waypoints = []
     # Cube calculates contains all coordinates within the cube and its edges
-    cube = Cube.cube(50,50,25,2,2,2,5,5,5)
-    wpose = group.get_current_pose().pose
+    cube = Cube.cube(50,50,25,2,2,2,2,2,2)
+    pose_target = geometry_msgs.msg.Pose()
+
     #all_coordinates is an array of all the coordinates, the coordinates are a tupel in this form: (x_coordinate,y_coordinate, z_coordinate)
     all_coordinates = cube.random_bottom_up_y_axis_accesses()
     previous_y = 0
     current_y = 0
+
     for i in range(0, len(all_coordinates)):
+
         if(previous_y != current_y):
-            #wait each time a plain is finished
             server.setPause(True)
             while server.getPause() == True:
                 print ("waiting at end of plain ", i)
                 time.sleep(5)
-                pass
+            #wait each time a plain is finished
+
+
+
         times = 0
         previous_y = current_y
         current_y = all_coordinates[i][1]
-        wpose.position.x = all_coordinates[i][0] * 0.01
-        wpose.position.y = all_coordinates[i][1] * 0.01
-        wpose.position.z = all_coordinates[i][2] * 0.01
-        waypoints.append(copy.deepcopy(wpose))
-    (plan, fraction) = group.compute_cartesian_path(
-        waypoints,  # waypoints to follow
-        0.01,  # eef_step
-        0.0)  # jump_threshold
-    group.execute((plan))
+        pose_target.position.x = all_coordinates[i][0] * 0.01
+        pose_target.position.y = all_coordinates[i][1] * 0.01
+        pose_target.position.z = all_coordinates[i][2] * 0.01
+        group.set_pose_target(pose_target)
+        plan = group.plan()
+        group.execute(plan)
+        server.setPause(True)
 
 
-    #alternativly to waypoints an example using pose_targets
+
+    #alternativly to waypoints
     #pose_target.position.x = all_coordinates[i][0] * 0.01
     #pose_target.position.y = all_coordinates[i][1] * 0.01
     #pose_target.position.z = all_coordinates[i][2] * 0.01
     #group.set_pose_target(pose_target)
     #plan = group.plan()
     #group.execute(plan)
+
+
 
 
 
@@ -174,10 +180,13 @@ def cycle():
 
 def main():
 
-  
+    #moveRoutine()
     cycle()
 
-    
+    #for method in server.system.listMethods():
+    #    print method
+    #    print server.system.methodHelp(method)
+    #    print ""
 
 
 
