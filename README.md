@@ -34,9 +34,9 @@ You'll have to set more parameters in your Rosparam server. Otherwise there will
     9. step_amount_z the amount of steps taken into z direction
 
 The following parameters are necessary to decide if you want to use the carthesian grid or different joint_torques to drive the robot 
-    cube_or_joints, set to 0 the program will use the carthesian grid. Default is 0 
-    sleep time, minimal waiting time between steps
-    default_pose, the name of your default pose. Default is 'home'
+   1. cube_or_joints, set to 0 the program will use the carthesian grid. Default is 0 
+   2. sleep time, minimal waiting time between steps
+   3. default_pose, the name of your default pose. Default is 'home'
     
 
     
