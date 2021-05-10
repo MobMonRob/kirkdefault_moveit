@@ -25,10 +25,8 @@ scene = moveit_commander.PlanningSceneInterface()
 
 
 ##it is important that you have the correct planning group, you find the correct planning group in the running moveit.rviz application
-if rospy.has_param('planning_group'):
-    planning_group = rospy.get_param('planning_group')
-else:
-    planning_group = 'ur_arm'
+planning_group = sys.argv[1]
+
 group = moveit_commander.MoveGroupCommander(planning_group)
 display_trajectory_publisher = rospy.Publisher(
                                     '/move_group/display_planned_path',
@@ -37,77 +35,39 @@ display_trajectory_publisher = rospy.Publisher(
 
 pose_target = geometry_msgs.msg.Pose()
 
-if rospy.has_param('server_name'):
-    server_name = rospy.get_param('server_name')
-else:
-    server_name = 'http://localhost:8000' #http://192.168.12.199:8000
+server_name = sys.argv[2]
+print server_name
 server = xmlrpclib.ServerProxy(server_name)
 
+start_x = int(sys.argv[3])
 
+start_y = int(sys.argv[4])
 
-if rospy.has_param('start_x'):
-    start_x = rospy.get_param('start_x')
-else:
-    start_x = 50
+start_z = int(sys.argv[5])
 
-if rospy.has_param('start_y'):
-    start_y = rospy.get_param('start_y')
-else:
-    start_y = 50
+step_x = int(sys.argv[6])
 
-if rospy.has_param('start_z'):
-    start_z = rospy.get_param('start_z')
-else:
-    start_z = 50
+step_y = int(sys.argv[7])
 
-if rospy.has_param('step_x'):
-    step_x = rospy.get_param('step_x')
-else:
-    step_x = 2
+step_z = int(sys.argv[8])
 
-if rospy.has_param('step_y'):
-    step_y = rospy.get_param('step_y')
-else:
-    step_y = 2
+step_amount_x = int(sys.argv[9])
 
-if rospy.has_param('step_z'):
-    step_z = rospy.get_param('step_z')
-else:
-    step_z = 2
+step_amount_y = int(sys.argv[10])
 
-if rospy.has_param('step_amount_x'):
-    step_amount_x = rospy.get_param('step_amount_x')
-else:
-    step_amount_x = 2
+step_amount_z = int(sys.argv[11])
 
-if rospy.has_param('step_amount_y'):
-    step_amount_y = rospy.get_param('step_amount_y')
-else:
-    step_amount_y = 2
+sleep_time = float(sys.argv[12])
 
-if rospy.has_param('step_amount_z'):
-    step_amount_z = rospy.get_param('step_amount_z')
-else:
-    step_amount_z = 2
-
-if rospy.has_param('sleep_time'):
-    sleep_time = rospy.get_param('sleep_time')
-else:
-    sleep_time = 5
-
-if rospy.has_param('default_pose'):
-    default_pose = rospy.get_param('default_pose')
-else:
-    default_pose = 'home'
+default_pose = sys.argv[13]
 
 
 #this param decides if we are driving to a carthesian defined cube or to a bunch of joints_states
 # if cube_or_joints = 0, the carthesian defined cube will be used
 # otherwise the bunch of joint_states will be used
-if rospy.has_param('cube_or_joints'):
-    cube_or_joints = rospy.get_param('cube_or_joints')
-else:
-    cube_or_joints = 0
+
+cube_or_joints = int(sys.argv[14])
+
 
 if rospy.has_param('all_joint_torque'):
     all_joint_torque = rospy.get_param('all_joint_torque')
